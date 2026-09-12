@@ -1,30 +1,72 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="utf-8">
+  <title>Phobicc.ajmall</title>
 
-<meta
-  name="viewport"
-  content="width=device-width,initial-scale=1"
->
+  <link rel="stylesheet" href="style.css">
 
-<title>
-  Phobicc.ajmall
-</title>
+  <!-- Font Awesome -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+  >
 
-<link
-  rel="stylesheet"
-  href="/style.css"
->
+  <style>
 
-<!-- Instagram Icon -->
-<link
-  rel="stylesheet"
-  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
->
+    /* =========================
+       INSTAGRAM
+    ========================= */
+
+    .navleft {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .insta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+
+      text-decoration: none;
+      color: white;
+
+      margin-top: 5px;
+      text-align: center;
+
+      transition: 0.2s;
+    }
+
+    .insta i {
+      font-size: 24px;
+      margin-bottom: 5px;
+    }
+
+    .insta span {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .insta small {
+      font-size: 12px;
+      margin-top: 4px;
+      opacity: 0.8;
+    }
+
+    .insta:hover {
+      transform: scale(1.05);
+    }
+
+    .insta:hover i {
+      color: #e1306c;
+    }
+
+  </style>
 
 </head>
 
@@ -32,326 +74,443 @@
 <body>
 
 
-<!-- INTRO -->
+  <!-- =========================
+       INTRO
+  ========================= -->
 
-<div
-  id="intro"
-  class="intro"
->
+  <div id="intro">
 
-  <div
-    id="introText"
-    class="welcome rainbow"
-  >
-    WELCOME
+    <!-- WELCOME -->
+    <div id="welcomeScreen">
+
+      <h1>
+        WELCOME
+      </h1>
+
+    </div>
+
+
+    <!-- BRAND -->
+    <div id="brandScreen">
+
+      <h1 class="rainbow">
+        Phobicc.ajmall
+      </h1>
+
+    </div>
+
   </div>
 
-</div>
 
 
-<!-- HEADER -->
+  <!-- =========================
+       MAIN WEBSITE
+  ========================= -->
 
-<header class="topbar">
+  <div id="mainSite">
 
-<nav class="nav">
 
-<div class="navleft">
+    <!-- =========================
+         TOP BAR
+    ========================= -->
 
-<h1 class="logo rainbow">
-  Phobicc.ajmall
-</h1>
+    <header class="topbar">
 
+      <nav class="nav">
 
-<!-- INSTAGRAM -->
 
-<a
-  class="insta"
-  href="https://www.instagram.com/phobicc.ajmall?stkn=dHgyeTd1MW04c3Zn"
-  target="_blank"
-  rel="noopener"
->
-  <i class="fa-brands fa-instagram"></i>
-  <span>phobicc.ajmall</span>
-</a>
+        <!-- LEFT / BRAND -->
 
+        <div class="navleft">
 
-</div>
+          <h1 class="logo rainbow">
+            Phobicc.ajmall
+          </h1>
 
 
-<a
-  class="login"
-  href="/admin"
->
-  LOGIN
-</a>
+          <!-- INSTAGRAM -->
 
-</nav>
+          <a
+            class="insta"
+            href="https://www.instagram.com/phobicc.ajmall?stkn=dHgyeTd1MW04c3Zn"
+            target="_blank"
+            rel="noopener"
+          >
 
-</header>
+            <i class="fa-brands fa-instagram"></i>
 
+            <span>
+              phobicc.ajmall
+            </span>
 
+            <small>
+              Follow my page
+            </small>
 
-<main class="main">
+          </a>
 
+        </div>
 
-<section class="hero">
 
-<h1 class="rainbow">
-  Phobicc.ajmall
-</h1>
+        <!-- LOGIN -->
 
-<p>
-  Photos • Videos • Creative Work
-</p>
+        <a
+          class="login"
+          href="/admin"
+        >
+          LOGIN
+        </a>
 
-</section>
 
+      </nav>
 
+    </header>
 
-<!-- MEDIA -->
 
-<section
-  id="mediaGrid"
-  class="media-grid"
->
 
-<div class="empty">
-  Loading photos and videos...
-</div>
+    <!-- =========================
+         HERO
+    ========================= -->
 
-</section>
+    <section class="hero">
 
+      <h1 class="rainbow">
+        Phobicc.ajmall
+      </h1>
 
+      <p>
+        Photography • Videography • Editing
+      </p>
 
-<!-- BUTTONS -->
+    </section>
 
-<div class="actions">
 
-<a
-  class="pill"
-  href="https://wa.me/919846913984?text=Hi%20Phobicc.ajmall%2C%20I%20would%20like%20to%20contact%20you%20about%20a%20work."
-  target="_blank"
-  rel="noopener"
->
-  CONTACT ME
-</a>
 
+    <!-- =========================
+         MEDIA
+    ========================= -->
 
-<a
-  class="pill"
-  href="/about"
->
-  ABOUT
-</a>
+    <section class="media-section">
 
-</div>
+      <h2>
+        My Works
+      </h2>
 
 
+      <div id="mediaContainer">
 
-<footer class="footer">
+        <!-- Photos and videos appear here -->
 
-©
-<span id="year"></span>
-Phobicc.ajmall
+      </div>
 
-</footer>
+    </section>
 
 
-</main>
 
+    <!-- =========================
+         CONTACT
+    ========================= -->
 
+    <section class="contact-section">
 
-<script>
+      <a
+        class="contact-btn"
+        href="https://wa.me/919846913984?text=Hello%20Ajmal"
+        target="_blank"
+        rel="noopener"
+      >
+        CONTACT ME
+      </a>
 
-const intro =
-  document.getElementById(
-    "intro"
-  );
+    </section>
 
-const introText =
-  document.getElementById(
-    "introText"
-  );
 
 
-/*
-10 seconds:
-WELCOME
-*/
+    <!-- =========================
+         ABOUT
+    ========================= -->
 
-setTimeout(
-  () => {
+    <section class="about-section">
 
-    introText.className =
-      "brandIntro rainbow";
+      <a
+        class="about-btn"
+        href="/about"
+      >
+        ABOUT
+      </a>
 
-    introText.textContent =
-      "Phobicc.ajmall";
+    </section>
 
-  },
-  10000
-);
 
 
-/*
-20 seconds:
-Open website
-*/
+    <!-- =========================
+         FOOTER
+    ========================= -->
 
-setTimeout(
-  () => {
+    <footer>
 
-    intro.classList.add(
-      "hide"
-    );
+      <p>
+        © 2026 Phobicc.ajmall
+      </p>
 
-  },
-  20000
-);
+    </footer>
 
 
-document.getElementById(
-  "year"
-).textContent =
-  new Date().getFullYear();
+  </div>
 
 
 
-async function loadMedia() {
+  <!-- =========================
+       JAVASCRIPT
+  ========================= -->
 
-  const grid =
-    document.getElementById(
-      "mediaGrid"
-    );
+  <script>
 
-  try {
 
-    const res =
-      await fetch(
-        "/api/media"
-      );
+    /* =========================
+       INTRO ANIMATION
+    ========================= */
 
-    const items =
-      await res.json();
+    const intro =
+      document.getElementById("intro");
 
+    const welcomeScreen =
+      document.getElementById("welcomeScreen");
 
-    if (
-      !Array.isArray(items) ||
-      items.length === 0
-    ) {
+    const brandScreen =
+      document.getElementById("brandScreen");
 
-      grid.innerHTML =
-        '<div class="empty">No photos or videos uploaded yet.</div>';
+    const mainSite =
+      document.getElementById("mainSite");
 
-      return;
+
+    // Main website hidden initially
+
+    mainSite.style.display = "none";
+
+
+    // WELCOME = 5 SECONDS
+
+    setTimeout(() => {
+
+      welcomeScreen.style.display = "none";
+
+      brandScreen.style.display = "flex";
+
+    }, 5000);
+
+
+    // PHOBICC.AJMALL = ANOTHER 5 SECONDS
+
+    setTimeout(() => {
+
+      intro.style.display = "none";
+
+      mainSite.style.display = "block";
+
+    }, 10000);
+
+
+
+    /* =========================
+       LOAD MEDIA
+    ========================= */
+
+    async function loadMedia() {
+
+      const container =
+        document.getElementById("mediaContainer");
+
+
+      try {
+
+        const response =
+          await fetch("/api/media");
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            "Failed to load media"
+          );
+
+        }
+
+
+        const media =
+          await response.json();
+
+
+        container.innerHTML = "";
+
+
+        /* NO MEDIA */
+
+        if (!media.length) {
+
+          container.innerHTML = `
+
+            <p class="no-media">
+              No photos or videos uploaded yet.
+            </p>
+
+          `;
+
+          return;
+
+        }
+
+
+        /* =========================
+           EACH MEDIA
+        ========================= */
+
+        media.forEach(item => {
+
+
+          const wrapper =
+            document.createElement("div");
+
+
+          wrapper.className =
+            "media-item";
+
+
+          /* =========================
+             IMAGE
+          ========================= */
+
+          if (
+            item.media_type &&
+            item.media_type.startsWith("image")
+          ) {
+
+
+            wrapper.innerHTML = `
+
+              <img
+                src="/uploads/${encodeURIComponent(item.filename)}"
+                alt="${item.description || "Photo"}"
+                loading="lazy"
+              >
+
+
+              ${
+                item.description
+                  ? `<h3>${escapeHtml(item.description)}</h3>`
+                  : ""
+              }
+
+
+              ${
+                item.details
+                  ? `<p>${escapeHtml(item.details)}</p>`
+                  : ""
+              }
+
+            `;
+
+
+          }
+
+
+          /* =========================
+             VIDEO
+          ========================= */
+
+          else {
+
+
+            wrapper.innerHTML = `
+
+              <video
+                controls
+                preload="metadata"
+              >
+
+                <source
+                  src="/uploads/${encodeURIComponent(item.filename)}"
+                >
+
+                Your browser does not support video.
+
+              </video>
+
+
+              ${
+                item.description
+                  ? `<h3>${escapeHtml(item.description)}</h3>`
+                  : ""
+              }
+
+
+              ${
+                item.details
+                  ? `<p>${escapeHtml(item.details)}</p>`
+                  : ""
+              }
+
+            `;
+
+          }
+
+
+          container.appendChild(wrapper);
+
+
+        });
+
+
+      }
+
+
+      catch (error) {
+
+
+        console.error(error);
+
+
+        container.innerHTML = `
+
+          <p class="error">
+            Unable to load photos and videos.
+          </p>
+
+        `;
+
+
+      }
+
     }
 
 
-    grid.innerHTML =
-      items
-        .map(
-          (item, i) => {
 
-            const media =
-              item.media_type ===
-              "video"
+    /* =========================
+       HTML ESCAPE
+    ========================= */
 
-                ?
+    function escapeHtml(text) {
 
-                `<video
-                  src="${escapeAttr(item.url)}"
-                  controls
-                  playsinline
-                  preload="metadata"
-                ></video>`
+      const div =
+        document.createElement("div");
 
-                :
+      div.textContent =
+        text;
 
-                `<img
-                  src="${escapeAttr(item.url)}"
-                  alt="${escapeAttr(item.description || "Phobicc.ajmall photo")}"
-                  loading="lazy"
-                >`;
+      return div.innerHTML;
+
+    }
 
 
-            return `
 
-<article
-  class="card"
-  style="animation-delay:${Math.min(i,10)*.05}s"
->
+    /* =========================
+       LOAD MEDIA
+    ========================= */
 
-${media}
-
-<div class="card-body">
-
-${
-  item.description
-    ?
-`<h3>${escapeHtml(
-  item.description
-)}</h3>`
-    : ""
-}
-
-${
-  item.details
-    ?
-`<p>${escapeHtml(
-  item.details
-)}</p>`
-    : ""
-}
-
-</div>
-
-</article>
-
-`;
-
-          }
-        )
-        .join("");
+    loadMedia();
 
 
-  } catch (error) {
-
-    grid.innerHTML =
-      '<div class="empty">Could not load media. Please try again later.</div>';
-
-  }
-
-}
-
-
-function escapeHtml(value) {
-
-  return String(value)
-    .replace(
-      /[&<>"']/g,
-      character =>
-        ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-        }[character])
-    );
-
-}
-
-
-function escapeAttr(value) {
-
-  return escapeHtml(value);
-
-}
-
-
-loadMedia();
-
-</script>
+  </script>
 
 
 </body>
