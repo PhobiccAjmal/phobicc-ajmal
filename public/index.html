@@ -16,11 +16,7 @@
   >
 
   <style>
-
-    /* =========================
-       INSTAGRAM
-    ========================= */
-
+    /* Instagram */
     .navleft {
       display: flex;
       flex-direction: column;
@@ -32,14 +28,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-
       text-decoration: none;
       color: white;
-
       margin-top: 5px;
       text-align: center;
-
-      transition: 0.2s;
     }
 
     .insta i {
@@ -60,73 +52,51 @@
 
     .insta:hover {
       transform: scale(1.05);
+      transition: 0.2s;
     }
 
     .insta:hover i {
       color: #e1306c;
     }
-
   </style>
-
 </head>
-
 
 <body>
 
-
   <!-- =========================
-       INTRO
-  ========================= -->
+       INTRO SCREEN
+  ========================== -->
 
   <div id="intro">
 
-    <!-- WELCOME -->
     <div id="welcomeScreen">
-
-      <h1>
-        WELCOME
-      </h1>
-
+      <h1>WELCOME</h1>
     </div>
 
-
-    <!-- BRAND -->
     <div id="brandScreen">
-
-      <h1 class="rainbow">
-        Phobicc.ajmall
-      </h1>
-
+      <h1 class="rainbow">Phobicc.ajmall</h1>
     </div>
 
   </div>
 
 
-
   <!-- =========================
        MAIN WEBSITE
-  ========================= -->
+  ========================== -->
 
   <div id="mainSite">
 
-
-    <!-- =========================
-         TOP BAR
-    ========================= -->
+    <!-- TOP BAR -->
 
     <header class="topbar">
 
       <nav class="nav">
-
-
-        <!-- LEFT / BRAND -->
 
         <div class="navleft">
 
           <h1 class="logo rainbow">
             Phobicc.ajmall
           </h1>
-
 
           <!-- INSTAGRAM -->
 
@@ -161,16 +131,14 @@
           LOGIN
         </a>
 
-
       </nav>
 
     </header>
 
 
-
     <!-- =========================
          HERO
-    ========================= -->
+    ========================== -->
 
     <section class="hero">
 
@@ -185,10 +153,9 @@
     </section>
 
 
-
     <!-- =========================
-         MEDIA
-    ========================= -->
+         MEDIA SECTION
+    ========================== -->
 
     <section class="media-section">
 
@@ -196,20 +163,16 @@
         My Works
       </h2>
 
-
       <div id="mediaContainer">
-
-        <!-- Photos and videos appear here -->
-
+        <!-- Photos and videos will appear here -->
       </div>
 
     </section>
 
 
-
     <!-- =========================
          CONTACT
-    ========================= -->
+    ========================== -->
 
     <section class="contact-section">
 
@@ -225,10 +188,9 @@
     </section>
 
 
-
     <!-- =========================
          ABOUT
-    ========================= -->
+    ========================== -->
 
     <section class="about-section">
 
@@ -242,10 +204,7 @@
     </section>
 
 
-
-    <!-- =========================
-         FOOTER
-    ========================= -->
+    <!-- FOOTER -->
 
     <footer>
 
@@ -255,87 +214,67 @@
 
     </footer>
 
-
   </div>
-
 
 
   <!-- =========================
        JAVASCRIPT
-  ========================= -->
+  ========================== -->
 
   <script>
 
-
-    /* =========================
+    /* -------------------------
        INTRO ANIMATION
-    ========================= */
+    ------------------------- */
 
-    const intro =
-      document.getElementById("intro");
-
-    const welcomeScreen =
-      document.getElementById("welcomeScreen");
-
-    const brandScreen =
-      document.getElementById("brandScreen");
-
-    const mainSite =
-      document.getElementById("mainSite");
+    const intro = document.getElementById("intro");
+    const welcomeScreen = document.getElementById("welcomeScreen");
+    const brandScreen = document.getElementById("brandScreen");
+    const mainSite = document.getElementById("mainSite");
 
 
-    // Main website hidden initially
-
+    // Hide main website initially
     mainSite.style.display = "none";
 
 
-    // WELCOME = 5 SECONDS
+    // WELCOME screen - 5 seconds
 
     setTimeout(() => {
 
       welcomeScreen.style.display = "none";
-
       brandScreen.style.display = "flex";
 
     }, 5000);
 
 
-    // PHOBICC.AJMALL = ANOTHER 5 SECONDS
+    // Brand screen - another 5 seconds
 
     setTimeout(() => {
 
       intro.style.display = "none";
-
       mainSite.style.display = "block";
 
     }, 10000);
 
 
 
-    /* =========================
+    /* -------------------------
        LOAD MEDIA
-    ========================= */
+    ------------------------- */
 
     async function loadMedia() {
 
       const container =
         document.getElementById("mediaContainer");
 
-
       try {
 
         const response =
           await fetch("/api/media");
 
-
         if (!response.ok) {
-
-          throw new Error(
-            "Failed to load media"
-          );
-
+          throw new Error("Failed to load media");
         }
-
 
         const media =
           await response.json();
@@ -344,47 +283,32 @@
         container.innerHTML = "";
 
 
-        /* NO MEDIA */
-
         if (!media.length) {
 
           container.innerHTML = `
-
             <p class="no-media">
               No photos or videos uploaded yet.
             </p>
-
           `;
 
           return;
-
         }
 
 
-        /* =========================
-           EACH MEDIA
-        ========================= */
-
         media.forEach(item => {
-
 
           const wrapper =
             document.createElement("div");
 
-
-          wrapper.className =
-            "media-item";
+          wrapper.className = "media-item";
 
 
-          /* =========================
-             IMAGE
-          ========================= */
+          /* IMAGE */
 
           if (
             item.media_type &&
             item.media_type.startsWith("image")
           ) {
-
 
             wrapper.innerHTML = `
 
@@ -394,13 +318,11 @@
                 loading="lazy"
               >
 
-
               ${
                 item.description
                   ? `<h3>${escapeHtml(item.description)}</h3>`
                   : ""
               }
-
 
               ${
                 item.details
@@ -410,16 +332,12 @@
 
             `;
 
-
           }
 
 
-          /* =========================
-             VIDEO
-          ========================= */
+          /* VIDEO */
 
           else {
-
 
             wrapper.innerHTML = `
 
@@ -436,13 +354,11 @@
 
               </video>
 
-
               ${
                 item.description
                   ? `<h3>${escapeHtml(item.description)}</h3>`
                   : ""
               }
-
 
               ${
                 item.details
@@ -457,27 +373,19 @@
 
           container.appendChild(wrapper);
 
-
         });
-
 
       }
 
-
       catch (error) {
-
 
         console.error(error);
 
-
         container.innerHTML = `
-
           <p class="error">
             Unable to load photos and videos.
           </p>
-
         `;
-
 
       }
 
@@ -485,17 +393,16 @@
 
 
 
-    /* =========================
+    /* -------------------------
        HTML ESCAPE
-    ========================= */
+    ------------------------- */
 
     function escapeHtml(text) {
 
       const div =
         document.createElement("div");
 
-      div.textContent =
-        text;
+      div.textContent = text;
 
       return div.innerHTML;
 
@@ -503,15 +410,13 @@
 
 
 
-    /* =========================
-       LOAD MEDIA
-    ========================= */
+    /* -------------------------
+       LOAD MEDIA WHEN PAGE OPENS
+    ------------------------- */
 
     loadMedia();
 
-
   </script>
-
 
 </body>
 
