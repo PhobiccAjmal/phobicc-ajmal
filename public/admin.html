@@ -1,5 +1,4 @@
 <!doctype html>
-
 <html lang="en">
 
 <head>
@@ -20,6 +19,9 @@
   href="/style.css"
 >
 
+<!-- SUPABASE JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 </head>
 
 
@@ -29,7 +31,9 @@
 <main class="main">
 
 
-<!-- LOGIN -->
+<!-- =========================
+     LOGIN
+========================= -->
 
 <section
   id="loginBox"
@@ -109,7 +113,9 @@
 
 
 
-<!-- ADMIN PANEL -->
+<!-- =========================
+     ADMIN PANEL
+========================= -->
 
 <section
   id="adminPanel"
@@ -180,6 +186,7 @@
 <button
   class="btn"
   type="submit"
+  id="uploadButton"
 >
   UPLOAD
 </button>
@@ -224,6 +231,10 @@
 
 <script>
 
+/* =========================
+   ELEMENTS
+========================= */
+
 const loginBox =
   document.getElementById(
     "loginBox"
@@ -244,26 +255,85 @@ const uploadStatus =
     "uploadStatus"
   );
 
+const uploadButton =
+  document.getElementById(
+    "uploadButton"
+  );
 
 
-async function checkSession() {
+/* =========================
+   SUPABASE
+========================= */
+
+let supabaseClient = null;
+
+
+/* =========================
+   LOAD SUPABASE CONFIG
+========================= */
+
+async function initSupabase() {
 
   const res =
     await fetch(
-      "/api/session"
+      "/api/public-config"
     );
+
 
   const data =
     await res.json();
 
 
-  if (
-    data.loggedIn
-  ) {
+  if (!res.ok) {
 
-    showPanel();
+    throw new Error(
+      data.error ||
+      "Supabase configuration failed."
+    );
 
-  } else {
+  }
+
+
+  supabaseClient =
+    window.supabase.createClient(
+      data.url,
+      data.anonKey
+    );
+
+}
+
+
+/* =========================
+   SESSION CHECK
+========================= */
+
+async function checkSession() {
+
+  try {
+
+    const res =
+      await fetch(
+        "/api/session"
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (
+      data.loggedIn
+    ) {
+
+      showPanel();
+
+    } else {
+
+      showLogin();
+
+    }
+
+  } catch {
 
     showLogin();
 
@@ -272,6 +342,9 @@ async function checkSession() {
 }
 
 
+/* =========================
+   SHOW LOGIN
+========================= */
 
 function showLogin() {
 
@@ -286,6 +359,9 @@ function showLogin() {
 }
 
 
+/* =========================
+   SHOW ADMIN PANEL
+========================= */
 
 function showPanel() {
 
@@ -302,6 +378,9 @@ function showPanel() {
 }
 
 
+/* =========================
+   LOGIN
+========================= */
 
 document
   .getElementById(
@@ -389,6 +468,9 @@ document
   );
 
 
+/* =========================
+   NEW LARGE FILE UPLOAD
+========================= */
 
 document
   .getElementById(
@@ -401,44 +483,218 @@ document
       event.preventDefault();
 
 
-      const form =
-        new FormData(
-          event.target
+      const fileInput =
+        document.getElementById(
+          "media"
         );
 
 
-      uploadStatus.textContent =
-        "Uploading...";
+      const file =
+        fileInput.files[0];
+
+
+      if (!file) {
+
+        uploadStatus.textContent =
+          "Choose a photo or video.";
+
+        return;
+
+      }
+
+
+      const description =
+        document
+          .getElementById(
+            "description"
+          )
+          .value
+          .trim();
+
+
+      const details =
+        document
+          .getElementById(
+            "details"
+          )
+          .value
+          .trim();
 
 
       try {
 
-        const res =
+        /* =========================
+           DISABLE BUTTON
+        ========================= */
+
+        uploadButton.disabled =
+          true;
+
+        uploadButton.textContent =
+          "UPLOADING...";
+
+
+        /* =========================
+           INITIALIZE SUPABASE
+        ========================= */
+
+        uploadStatus.textContent =
+          "Preparing upload...";
+
+
+        if (!supabaseClient) {
+
+          await initSupabase();
+
+        }
+
+
+        /* =========================
+           STEP 1
+           GET SIGNED UPLOAD URL
+        ========================= */
+
+        const urlResponse =
           await fetch(
-            "/api/upload",
+            "/api/upload-url",
             {
               method:
                 "POST",
 
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
               body:
-                form
+                JSON.stringify({
+                  filename:
+                    file.name,
+
+                  contentType:
+                    file.type
+                })
             }
           );
 
 
-        const data =
-          await res.json();
+        const urlData =
+          await urlResponse.json();
 
 
-        if (!res.ok) {
+        if (!urlResponse.ok) {
 
           throw new Error(
-            data.error ||
-            "Upload failed."
+            urlData.error ||
+            "Could not prepare upload."
           );
 
         }
 
+
+        /* =========================
+           STEP 2
+           DIRECT UPLOAD TO SUPABASE
+        ========================= */
+
+        uploadStatus.textContent =
+          "Uploading directly to storage...";
+
+
+        const {
+          error: uploadError
+        } =
+          await supabaseClient
+            .storage
+            .from("media")
+            .uploadToSignedUrl(
+              urlData.path,
+              urlData.token,
+              file,
+              {
+                contentType:
+                  file.type,
+
+                upsert:
+                  false
+              }
+            );
+
+
+        if (uploadError) {
+
+          throw new Error(
+            uploadError.message
+          );
+
+        }
+
+
+        /* =========================
+           STEP 3
+           SAVE DATABASE RECORD
+        ========================= */
+
+        uploadStatus.textContent =
+          "Saving media information...";
+
+
+        const completeResponse =
+          await fetch(
+            "/api/complete-upload",
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json"
+              },
+
+              body:
+                JSON.stringify({
+
+                  filename:
+                    file.name,
+
+                  storagePath:
+                    urlData.path,
+
+                  description:
+                    description,
+
+                  details:
+                    details,
+
+                  mediaType:
+                    file.type.startsWith(
+                      "video/"
+                    )
+                      ? "video"
+                      : "image"
+
+                })
+            }
+          );
+
+
+        const completeData =
+          await completeResponse.json();
+
+
+        if (!completeResponse.ok) {
+
+          throw new Error(
+            completeData.error ||
+            "Could not save media."
+          );
+
+        }
+
+
+        /* =========================
+           SUCCESS
+        ========================= */
 
         uploadStatus.textContent =
           "Uploaded successfully.";
@@ -452,8 +708,24 @@ document
 
       } catch (error) {
 
+        console.error(
+          "UPLOAD ERROR:",
+          error
+        );
+
+
         uploadStatus.textContent =
+          "Upload failed: " +
           error.message;
+
+
+      } finally {
+
+        uploadButton.disabled =
+          false;
+
+        uploadButton.textContent =
+          "UPLOAD";
 
       }
 
@@ -461,6 +733,9 @@ document
   );
 
 
+/* =========================
+   LOAD MEDIA
+========================= */
 
 async function loadAdminMedia() {
 
@@ -484,6 +759,16 @@ async function loadAdminMedia() {
 
     const items =
       await res.json();
+
+
+    if (!res.ok) {
+
+      throw new Error(
+        items.error ||
+        "Could not load media."
+      );
+
+    }
 
 
     if (
@@ -562,7 +847,9 @@ ${esc(item.filename)}
         .join("");
 
 
-  } catch {
+  } catch (error) {
+
+    console.error(error);
 
     box.innerHTML =
       '<div class="small">Could not load media.</div>';
@@ -572,6 +859,9 @@ ${esc(item.filename)}
 }
 
 
+/* =========================
+   DELETE MEDIA
+========================= */
 
 async function deleteMedia(id) {
 
@@ -586,38 +876,53 @@ async function deleteMedia(id) {
   }
 
 
-  const res =
-    await fetch(
-      "/api/media/" +
-      id,
-      {
-        method:
-          "DELETE"
-      }
-    );
+  try {
+
+    const res =
+      await fetch(
+        "/api/media/" +
+        id,
+        {
+          method:
+            "DELETE"
+        }
+      );
 
 
-  const data =
-    await res.json();
+    const data =
+      await res.json();
 
 
-  if (!res.ok) {
+    if (!res.ok) {
+
+      alert(
+        data.error ||
+        "Delete failed."
+      );
+
+      return;
+
+    }
+
+
+    loadAdminMedia();
+
+
+  } catch (error) {
 
     alert(
-      data.error ||
+      error.message ||
       "Delete failed."
     );
 
-    return;
-
   }
-
-
-  loadAdminMedia();
 
 }
 
 
+/* =========================
+   LOGOUT
+========================= */
 
 async function logout() {
 
@@ -640,6 +945,9 @@ async function logout() {
 }
 
 
+/* =========================
+   ESCAPE HTML
+========================= */
 
 function esc(value) {
 
@@ -648,16 +956,30 @@ function esc(value) {
       /[&<>"']/g,
       character =>
         ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
+          "&":
+            "&amp;",
+
+          "<":
+            "&lt;",
+
+          ">":
+            "&gt;",
+
+          '"':
+            "&quot;",
+
+          "'":
+            "&#039;"
+
         }[character])
     );
 
 }
 
+
+/* =========================
+   START
+========================= */
 
 checkSession();
 
