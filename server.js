@@ -2,25 +2,33 @@ const express = require("express");
 const path = require("path");
 const crypto = require("crypto");
 const cookieParser = require("cookie-parser");
-const multer = require("multer");
 const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 
 const PORT = Number(process.env.PORT || 10000);
 
+/* =========================
+   ENVIRONMENT VARIABLES
+========================= */
+
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_ROLE_KEY =
   process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-const ADMIN_ID = process.env.ADMIN_ID || "Ajmal350";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
-const SESSION_SECRET = process.env.SESSION_SECRET;
+const ADMIN_ID =
+  process.env.ADMIN_ID || "Ajmal350";
+
+const ADMIN_PASSWORD =
+  process.env.ADMIN_PASSWORD;
+
+const SESSION_SECRET =
+  process.env.SESSION_SECRET;
 
 
-// =========================
-// CHECK ENVIRONMENT VARIABLES
-// =========================
+/* =========================
+   CHECK ENVIRONMENT
+========================= */
 
 if (
   !SUPABASE_URL ||
@@ -28,14 +36,17 @@ if (
   !ADMIN_PASSWORD ||
   !SESSION_SECRET
 ) {
-  console.error("Missing Render environment variables.");
+  console.error(
+    "Missing Render environment variables."
+  );
+
   process.exit(1);
 }
 
 
-// =========================
-// SUPABASE
-// =========================
+/* =========================
+   SUPABASE
+========================= */
 
 const supabase = createClient(
   SUPABASE_URL,
@@ -48,9 +59,9 @@ const supabase = createClient(
 );
 
 
-// =========================
-// EXPRESS
-// =========================
+/* =========================
+   MIDDLEWARE
+========================= */
 
 app.use(
   express.json({
@@ -61,39 +72,9 @@ app.use(
 app.use(cookieParser());
 
 
-// =========================
-// MULTER UPLOAD
-// =========================
-
-const upload = multer({
-  storage: multer.memoryStorage(),
-
-  limits: {
-    fileSize: 100 * 1024 * 1024
-  },
-
-  fileFilter: (req, file, cb) => {
-
-    const allowed =
-      file.mimetype.startsWith("image/") ||
-      file.mimetype.startsWith("video/");
-
-    if (!allowed) {
-      return cb(
-        new Error(
-          "Only image and video files are allowed."
-        )
-      );
-    }
-
-    cb(null, true);
-  }
-});
-
-
-// =========================
-// LOGIN SYSTEM
-// =========================
+/* =========================
+   SESSION FUNCTIONS
+========================= */
 
 function sign(value) {
   return crypto
@@ -129,23 +110,34 @@ function validSession(token) {
       return false;
     }
 
-    const parts = token.split(".");
+    const parts =
+      token.split(".");
 
     if (parts.length !== 2) {
       return false;
     }
 
-    const encoded = parts[0];
-    const signature = parts[1];
+    const encoded =
+      parts[0];
+
+    const signature =
+      parts[1];
 
     const payload =
       Buffer
-        .from(encoded, "base64url")
+        .from(
+          encoded,
+          "base64url"
+        )
         .toString("utf8");
 
-    const expected = sign(payload);
+    const expected =
+      sign(payload);
 
-    if (signature.length !== expected.length) {
+    if (
+      signature.length !==
+      expected.length
+    ) {
       return false;
     }
 
@@ -158,12 +150,17 @@ function validSession(token) {
       return false;
     }
 
-    const parts2 = payload.split(":");
+    const payloadParts =
+      payload.split(":");
 
-    const id = parts2[0];
-    const created = Number(parts2[1]);
+    const id =
+      payloadParts[0];
 
-    const age = Date.now() - created;
+    const created =
+      Number(payloadParts[1]);
+
+    const age =
+      Date.now() - created;
 
     return (
       id === ADMIN_ID &&
@@ -180,15 +177,16 @@ function validSession(token) {
   } catch {
 
     return false;
+
   }
 }
 
 
-// =========================
-// ADMIN PROTECTION
-// =========================
-
-function requireAdmin(req, res, next) {
+function requireAdmin(
+  req,
+  res,
+  next
+) {
 
   if (
     !validSession(
@@ -199,98 +197,38 @@ function requireAdmin(req, res, next) {
     return res
       .status(401)
       .json({
-        error: "Unauthorized"
+        error:
+          "Unauthorized"
       });
+
   }
 
   next();
 }
 
 
-// =========================
-// PUBLIC MEDIA
-// =========================
-
-app.get(
-  "/api/media",
-  async (req, res) => {
-
-    try {
-
-      const {
-        data,
-        error
-      } =
-        await supabase
-          .from("media")
-          .select(
-            "id,filename,storage_path,description,details,media_type,created_at"
-          )
-          .order(
-            "created_at",
-            {
-              ascending: false
-            }
-          );
-
-      if (error) {
-
-        return res
-          .status(500)
-          .json({
-            error: error.message
-          });
-      }
-
-      const items =
-        (data || []).map((item) => {
-
-          const url =
-            SUPABASE_URL +
-            "/storage/v1/object/public/media/" +
-            encodeURIComponent(
-              item.storage_path
-            );
-
-          return {
-            ...item,
-            url
-          };
-
-        });
-
-      res.json(items);
-
-    } catch (error) {
-
-      res
-        .status(500)
-        .json({
-          error:
-            error.message ||
-            "Could not load media."
-        });
-    }
-  }
-);
-
-
-// =========================
-// LOGIN
-// =========================
+/* =========================
+   LOGIN
+========================= */
 
 app.post(
   "/api/login",
   (req, res) => {
 
-    const {
-      id,
-      password
-    } = req.body || {};
+    const id =
+      String(
+        req.body.id || ""
+      ).trim();
+
+    const password =
+      String(
+        req.body.password || ""
+      );
 
     if (
       id !== ADMIN_ID ||
-      password !== ADMIN_PASSWORD
+      password !==
+        ADMIN_PASSWORD
     ) {
 
       return res
@@ -299,63 +237,39 @@ app.post(
           error:
             "Invalid ID or password."
         });
+
     }
+
+    const session =
+      createSession();
 
     res.cookie(
       "admin_session",
-      createSession(),
+      session,
       {
         httpOnly: true,
-
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-
+        secure: true,
         sameSite: "lax",
-
         maxAge:
           7 *
           24 *
           60 *
           60 *
-          1000,
-
-        path: "/"
+          1000
       }
     );
 
     res.json({
       ok: true
     });
+
   }
 );
 
 
-// =========================
-// LOGOUT
-// =========================
-
-app.post(
-  "/api/logout",
-  (req, res) => {
-
-    res.clearCookie(
-      "admin_session",
-      {
-        path: "/"
-      }
-    );
-
-    res.json({
-      ok: true
-    });
-  }
-);
-
-
-// =========================
-// CHECK LOGIN
-// =========================
+/* =========================
+   SESSION CHECK
+========================= */
 
 app.get(
   "/api/session",
@@ -364,35 +278,244 @@ app.get(
     res.json({
       loggedIn:
         validSession(
-          req.cookies.admin_session
+          req.cookies
+            .admin_session
         )
     });
+
   }
 );
 
 
-// =========================
-// UPLOAD PHOTO / VIDEO
-// =========================
+/* =========================
+   LOGOUT
+========================= */
 
 app.post(
-  "/api/upload",
-  requireAdmin,
-  upload.single("media"),
+  "/api/logout",
+  (req, res) => {
 
+    res.clearCookie(
+      "admin_session"
+    );
+
+    res.json({
+      ok: true
+    });
+
+  }
+);
+
+
+/* =========================
+   PUBLIC SUPABASE CONFIG
+========================= */
+
+app.get(
+  "/api/public-config",
+  (req, res) => {
+
+    const SUPABASE_ANON_KEY =
+      process.env
+        .SUPABASE_ANON_KEY;
+
+    if (
+      !SUPABASE_ANON_KEY
+    ) {
+
+      return res
+        .status(500)
+        .json({
+          error:
+            "SUPABASE_ANON_KEY is missing."
+        });
+
+    }
+
+    res.json({
+      url:
+        SUPABASE_URL,
+
+      anonKey:
+        SUPABASE_ANON_KEY
+    });
+
+  }
+);
+
+
+/* =========================
+   CREATE SIGNED UPLOAD URL
+========================= */
+
+app.post(
+  "/api/upload-url",
+  requireAdmin,
   async (req, res) => {
 
     try {
 
-      if (!req.file) {
+      const filename =
+        String(
+          req.body.filename || ""
+        ).trim();
+
+      const contentType =
+        String(
+          req.body.contentType || ""
+        ).trim();
+
+
+      if (!filename) {
 
         return res
           .status(400)
           .json({
             error:
-              "Choose a photo or video."
+              "Filename is required."
           });
+
       }
+
+
+      const isImage =
+        contentType.startsWith(
+          "image/"
+        );
+
+      const isVideo =
+        contentType.startsWith(
+          "video/"
+        );
+
+
+      if (
+        !isImage &&
+        !isVideo
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Only image and video files are allowed."
+          });
+
+      }
+
+
+      let ext =
+        path
+          .extname(filename)
+          .toLowerCase()
+          .replace(
+            /[^a-z0-9.]/g,
+            ""
+          )
+          .slice(0, 10);
+
+
+      if (!ext) {
+
+        ext =
+          isVideo
+            ? ".mp4"
+            : ".jpg";
+
+      }
+
+
+      const storagePath =
+        Date.now() +
+        "-" +
+        crypto
+          .randomBytes(10)
+          .toString("hex") +
+        ext;
+
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .storage
+          .from("media")
+          .createSignedUploadUrl(
+            storagePath
+          );
+
+
+      if (error) {
+
+        console.error(
+          "Signed URL error:",
+          error
+        );
+
+        return res
+          .status(500)
+          .json({
+            error:
+              error.message
+          });
+
+      }
+
+
+      res.json({
+
+        ok: true,
+
+        path:
+          storagePath,
+
+        token:
+          data.token
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      res
+        .status(500)
+        .json({
+          error:
+            error.message ||
+            "Could not create upload URL."
+        });
+
+    }
+
+  }
+);
+
+
+/* =========================
+   COMPLETE UPLOAD
+========================= */
+
+app.post(
+  "/api/complete-upload",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const filename =
+        String(
+          req.body.filename || ""
+        ).trim();
+
+
+      const storagePath =
+        String(
+          req.body.storagePath || ""
+        ).trim();
 
 
       const description =
@@ -411,101 +534,61 @@ app.post(
           .slice(0, 5000);
 
 
-      // File extension
-      const ext =
-        path
-          .extname(
-            req.file.originalname
-          )
-          .toLowerCase()
-          .replace(
-            /[^a-z0-9.]/g,
-            ""
-          )
-          .slice(0, 10);
+      const mediaType =
+        req.body.mediaType ===
+        "video"
+          ? "video"
+          : "image";
 
 
-      // Unique filename
-      const fileName =
-        Date.now() +
-        "-" +
-        crypto
-          .randomBytes(8)
-          .toString("hex") +
-        ext;
-
-
-      const storagePath =
-        fileName;
-
-
-      // =========================
-      // UPLOAD TO SUPABASE STORAGE
-      // =========================
-
-      const {
-        error: uploadError
-      } =
-        await supabase
-          .storage
-          .from("media")
-          .upload(
-            storagePath,
-            req.file.buffer,
-            {
-              contentType:
-                req.file.mimetype,
-
-              upsert: false
-            }
-          );
-
-
-      if (uploadError) {
+      if (
+        !filename ||
+        !storagePath
+      ) {
 
         return res
-          .status(500)
+          .status(400)
           .json({
             error:
-              uploadError.message
+              "Missing upload information."
           });
+
       }
 
 
-      // =========================
-      // SAVE INFORMATION TO DATABASE
-      // =========================
-
       const {
         data,
-        error: dbError
+        error
       } =
         await supabase
           .from("media")
           .insert({
             filename:
-              req.file.originalname,
+              filename,
 
             storage_path:
               storagePath,
 
-            description,
+            description:
+              description,
 
-            details,
+            details:
+              details,
 
             media_type:
-              req.file.mimetype
-                .startsWith("video/")
-                ? "video"
-                : "image"
+              mediaType
           })
           .select()
           .single();
 
 
-      // If database fails,
-      // delete uploaded file
-      if (dbError) {
+      if (error) {
+
+        console.error(
+          "Database error:",
+          error
+        );
+
 
         await supabase
           .storage
@@ -514,36 +597,115 @@ app.post(
             storagePath
           ]);
 
+
         return res
           .status(500)
           .json({
             error:
-              dbError.message
+              error.message
           });
+
       }
 
 
-      // =========================
-      // RETURN UPLOADED MEDIA
-      // =========================
+      const publicUrl =
+        SUPABASE_URL +
+        "/storage/v1/object/public/media/" +
+        encodeURIComponent(
+          storagePath
+        );
+
 
       res.json({
 
         ok: true,
 
         item: {
-
           ...data,
-
           url:
-            SUPABASE_URL +
-            "/storage/v1/object/public/media/" +
-            encodeURIComponent(
-              storagePath
-            )
+            publicUrl
         }
+
       });
 
+    } catch (error) {
+
+      console.error(
+        error
+      );
+
+      res
+        .status(500)
+        .json({
+          error:
+            error.message ||
+            "Could not save upload."
+        });
+
+    }
+
+  }
+);
+
+
+/* =========================
+   GET MEDIA
+========================= */
+
+app.get(
+  "/api/media",
+  async (req, res) => {
+
+    try {
+
+      const {
+        data,
+        error
+      } =
+        await supabase
+          .from("media")
+          .select("*")
+          .order(
+            "created_at",
+            {
+              ascending:
+                false
+            }
+          );
+
+
+      if (error) {
+
+        return res
+          .status(500)
+          .json({
+            error:
+              error.message
+          });
+
+      }
+
+
+      const items =
+        data.map(
+          item => ({
+
+            ...item,
+
+            url:
+              SUPABASE_URL +
+              "/storage/v1/object/public/media/" +
+              encodeURIComponent(
+                item.storage_path
+              )
+
+          })
+        );
+
+
+      res.json(
+        items
+      );
 
     } catch (error) {
 
@@ -551,59 +713,38 @@ app.post(
         .status(500)
         .json({
           error:
-            error.message ||
-            "Upload failed."
+            error.message
         });
+
     }
+
   }
 );
 
 
-// =========================
-// DELETE MEDIA
-// =========================
+/* =========================
+   DELETE MEDIA
+========================= */
 
 app.delete(
   "/api/media/:id",
   requireAdmin,
-
   async (req, res) => {
 
     try {
 
       const id =
-        Number(
-          req.params.id
-        );
+        req.params.id;
 
 
-      if (
-        !Number.isInteger(id)
-      ) {
-
-        return res
-          .status(400)
-          .json({
-            error:
-              "Invalid media ID."
-          });
-      }
-
-
-      // Find media record
       const {
         data: item,
         error: findError
       } =
         await supabase
           .from("media")
-          .select(
-            "id,storage_path"
-          )
-          .eq(
-            "id",
-            id
-          )
+          .select("*")
+          .eq("id", id)
           .single();
 
 
@@ -618,10 +759,10 @@ app.delete(
             error:
               "Media not found."
           });
+
       }
 
 
-      // Delete file from Storage
       const {
         error: storageError
       } =
@@ -635,26 +776,20 @@ app.delete(
 
       if (storageError) {
 
-        return res
-          .status(500)
-          .json({
-            error:
-              storageError.message
-          });
+        console.error(
+          storageError
+        );
+
       }
 
 
-      // Delete database record
       const {
         error: deleteError
       } =
         await supabase
           .from("media")
           .delete()
-          .eq(
-            "id",
-            id
-          );
+          .eq("id", id);
 
 
       if (deleteError) {
@@ -665,6 +800,7 @@ app.delete(
             error:
               deleteError.message
           });
+
       }
 
 
@@ -672,24 +808,24 @@ app.delete(
         ok: true
       });
 
-
     } catch (error) {
 
       res
         .status(500)
         .json({
           error:
-            error.message ||
-            "Delete failed."
+            error.message
         });
+
     }
+
   }
 );
 
 
-// =========================
-// WEBSITE FILES
-// =========================
+/* =========================
+   STATIC FILES
+========================= */
 
 app.use(
   express.static(
@@ -701,9 +837,9 @@ app.use(
 );
 
 
-// =========================
-// ADMIN PAGE
-// =========================
+/* =========================
+   ADMIN PAGE
+========================= */
 
 app.get(
   "/admin",
@@ -716,13 +852,14 @@ app.get(
         "admin.html"
       )
     );
+
   }
 );
 
 
-// =========================
-// ABOUT PAGE
-// =========================
+/* =========================
+   ABOUT PAGE
+========================= */
 
 app.get(
   "/about",
@@ -735,13 +872,14 @@ app.get(
         "about.html"
       )
     );
+
   }
 );
 
 
-// =========================
-// DEFAULT PAGE
-// =========================
+/* =========================
+   HOME / FALLBACK
+========================= */
 
 app.use(
   (req, res) => {
@@ -753,64 +891,21 @@ app.use(
         "index.html"
       )
     );
+
   }
 );
 
 
-// =========================
-// ERROR HANDLER
-// =========================
-
-app.use(
-  (err, req, res, next) => {
-
-    if (
-      err instanceof multer.MulterError
-    ) {
-
-      if (
-        err.code ===
-        "LIMIT_FILE_SIZE"
-      ) {
-
-        return res
-          .status(413)
-          .json({
-            error:
-              "Maximum file size is 100 MB."
-          });
-      }
-
-      return res
-        .status(400)
-        .json({
-          error:
-            err.message
-        });
-    }
-
-    res
-      .status(400)
-      .json({
-        error:
-          err.message ||
-          "Request failed."
-      });
-  }
-);
-
-
-// =========================
-// START SERVER
-// =========================
+/* =========================
+   START SERVER
+========================= */
 
 app.listen(
   PORT,
   () => {
 
     console.log(
-      "Phobicc.ajmall running on port " +
-      PORT
+      `Phobicc.ajmall running on port ${PORT}`
     );
 
   }
